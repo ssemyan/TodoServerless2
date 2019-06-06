@@ -11,6 +11,8 @@ The SPA is very simple with Bootstrap for styles, Knockout.js for data binding, 
 
 Users can add new items to their list, or mark existing items as complete (which deletes them). The inital call to the API pulls the current list of items for the user, along with the user's display name (from the auth claims). 
 
+This sample is similar to https://github.com/ssemyan/TodoServerless but uses Functions 2.0 and instead of serving the content from a storage account via a proxy, it uses an App Service to host the HTML and JS.  
+
 ## Setup steps on Localhost
 
 1. Install the Azure CLI tools from here: https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local
