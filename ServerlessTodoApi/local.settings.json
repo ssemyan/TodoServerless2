@@ -1,0 +1,11 @@
+{
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*"
+  },
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "CosmosDBConnectionString": "[Your CosmosDB Connection String]"
+  }
+}

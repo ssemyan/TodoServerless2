@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.452
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerlessTodoApi", "ServerlessTodoApi\ServerlessTodoApi.csproj", "{B31FD486-57EE-4369-968C-19DF36028B2E}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "ServerlessTodoUi", "ServerlessTodoUi\", "{EE347EA4-53F6-4567-87AC-F238F7AD9A14}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_64103"
+		Debug.AspNetCompiler.PhysicalPath = "ServerlessTodoUi\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_64103\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_64103"
+		Release.AspNetCompiler.PhysicalPath = "ServerlessTodoUi\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_64103\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "64103"
+		SlnRelativePath = "ServerlessTodoUi\"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B31FD486-57EE-4369-968C-19DF36028B2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B31FD486-57EE-4369-968C-19DF36028B2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B31FD486-57EE-4369-968C-19DF36028B2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B31FD486-57EE-4369-968C-19DF36028B2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE347EA4-53F6-4567-87AC-F238F7AD9A14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE347EA4-53F6-4567-87AC-F238F7AD9A14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE347EA4-53F6-4567-87AC-F238F7AD9A14}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE347EA4-53F6-4567-87AC-F238F7AD9A14}.Release|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CC695AE6-3138-489D-B926-3A0C44015FC5}
+	EndGlobalSection
+EndGlobal
