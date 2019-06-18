@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "web_ui_name": {
+      "value": "mywebsite"
+    },
+    "web_api_name": {
+      "value": "myapi"
+    },
+    "app_service_plan_name": {
+      "value": "myplan"
+    },
+    "storage_act_name": {
+      "value": "mystorageacct"
+    },
+    "cosmosdb_act_name": {
+      "value": "mycosmosacct"
+    },
+    "aad_tenant_id": {
+      "value": "mytenantid"
+    },
+    "api_client_id": {
+      "value": "myapiclientid"
+    },
+    "api_client_secret": {
+      "value": "myapiclientsecret"
+    },
+    "ui_client_id": {
+      "value": "myuiclientid"
+    },
+    "ui_client_secret": {
+      "value": "myuiclientsecret"
+    }
+  }
+}

@@ -1,0 +1,266 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "web_ui_name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the web UI app service - must be unique."
+      }
+    },
+    "web_api_name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Functions App - must be unique."
+      }
+    },
+    "app_service_plan_name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the app service plan shared by the Functions and UI."
+      }
+    },
+    "storage_act_name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the storage account for the Function App - must be unique."
+      }
+    },
+    "cosmosdb_act_name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Cosmos DB Account - must be unique."
+      }
+    },
+    "aad_tenant_id": {
+      "type": "string",
+      "metadata": {
+        "description": "ID of the Azure Active Directory tenant the UI and API clients are in."
+      }
+    },
+    "api_client_id": {
+      "type": "string",
+      "metadata": {
+        "description": "ID of the client for the Function."
+      }
+    },
+    "api_client_secret": {
+      "type": "string",
+      "metadata": {
+        "description": "Secret for the client for the Function."
+      }
+    },
+    "ui_client_id": {
+      "type": "string",
+      "metadata": {
+        "description": "ID of the client for the UI."
+      }
+    },
+    "ui_client_secret": {
+      "type": "string",
+      "metadata": {
+        "description": "Secret for the client for the Function."
+      }
+    }
+  },
+  "variables": {
+    "app_service_plan_sku": "S1",
+    "databaseThroughput": 400,
+    "databaseName": "ServerlessTodo",
+    "containerName": "TodoItems",
+    "partitionKey": "/ItemOwner",
+    "secret_name": "CosmosDBConnectionString"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2015-04-08",
+      "name": "[parameters('cosmosdb_act_name')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "databaseAccountOfferType": "Standard",
+        "locations": [
+          {
+            "locationName": "[resourceGroup().location]",
+            "failoverPriority": 0
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/apis/databases",
+      "name": "[concat(parameters('cosmosdb_act_name'), '/sql/', variables('databaseName'))]",
+      "apiVersion": "2015-04-08",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts/', parameters('cosmosdb_act_name'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('databaseName')]"
+        },
+        "options": { "throughput": "[variables('databaseThroughput')]" }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDb/databaseAccounts/apis/databases/containers",
+      "name": "[concat(parameters('cosmosdb_act_name'), '/sql/', variables('databaseName'), '/', variables('containerName'))]",
+      "apiVersion": "2016-03-31",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts/apis/databases', parameters('cosmosdb_act_name'), 'sql', variables('databaseName'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('containerName')]",
+          "partitionKey": {
+            "paths": [
+              "[variables('partitionKey')]"
+            ],
+            "kind": "Hash"
+          }
+        },
+        "options": { "throughput": "[variables('databaseThroughput')]" }
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2018-07-01",
+      "name": "[parameters('storage_act_name')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "properties": {},
+      "kind": "Storage"
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2016-09-01",
+      "name": "[parameters('app_service_plan_name')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "[variables('app_service_plan_sku')]"
+      },
+      "kind": "app",
+      "properties": {},
+      "dependsOn": []
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2016-08-01",
+      "name": "[parameters('web_api_name')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('app_service_plan_name'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storage_act_name'))]",
+        "[resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('cosmosdb_act_name'))]"
+      ],
+      "kind": "functionapp",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('app_service_plan_name'))]",
+        "httpsOnly": false,
+        "clientAffinityEnabled": false,
+        "siteConfig": {
+          "alwaysOn": true,
+          "cors": {
+            "allowedOrigins": [
+              "https://functions.azure.com",
+              "[concat('https://', parameters('web_ui_name'), '.azurewebsites.net')]"
+            ],
+            "supportCredentials": false
+          },
+          "appSettings": [
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "dotnet"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',parameters('storage_act_name'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storage_act_name')), '2015-05-01-preview').key1,';')]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~2"
+            },
+            {
+              "Name": "CosmosDBConnectionString",
+              "Value": "[concat('AccountEndpoint=', reference(concat('Microsoft.DocumentDb/databaseAccounts/', parameters('cosmosdb_act_name'))).documentEndpoint, ';AccountKey=', listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('cosmosdb_act_name')), '2015-04-08').primaryMasterKey, ';')]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "authsettings",
+          "type": "config",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [ "[resourceId('Microsoft.Web/sites/', parameters('web_api_name'))]" ],
+          "tags": {
+            "displayName": "websiteAuthSettings"
+          },
+          "properties": {
+            "enabled": true,
+            "unauthenticatedClientAction": "AllowAnonymous",
+            "tokenStoreEnabled": true,
+            "defaultProvider": "AzureActiveDirectory",
+            "clientId": "[parameters('api_client_id')]",
+            "clientSecret": "[parameters('api_client_secret')]",
+            "issuer": "[concat('https://sts.windows.net/', parameters('aad_tenant_id'), '/')]",
+            "allowedAudiences": [
+              "[concat('https://', parameters('web_api_name'), '.azurewebsites.net/.auth/login/aad/callback')]"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2016-08-01",
+      "name": "[parameters('web_ui_name')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('app_service_plan_name'))]"
+      ],
+      "kind": "app",
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('app_service_plan_name'))]",
+        "clientAffinityEnabled": false,
+        "alwaysOn": true
+      },
+      "resources": [
+        {
+          "name": "authsettings",
+          "type": "config",
+          "apiVersion": "2015-08-01",
+          "dependsOn": [ "[resourceId('Microsoft.Web/sites/', parameters('web_ui_name'))]" ],
+          "tags": {
+            "displayName": "websiteAuthSettings"
+          },
+          "properties": {
+            "enabled": true,
+            "unauthenticatedClientAction": "AllowAnonymous",
+            "tokenStoreEnabled": true,
+            "defaultProvider": "AzureActiveDirectory",
+            "clientId": "[parameters('ui_client_id')]",
+            "clientSecret": "[parameters('ui_client_secret')]",
+            "issuer": "[concat('https://sts.windows.net/', parameters('aad_tenant_id'), '/')]",
+            "allowedAudiences": [
+              "[concat('https://', parameters('web_ui_name'), '.azurewebsites.net/.auth/login/aad/callback')]"
+            ],
+            "additionalLoginParams": [
+              "response_type=code id_token",
+              "[concat('resource=', parameters('api_client_id'))]"
+            ],
+            "isAadAutoProvisioned": false,
+            "googleClientId": null,
+            "googleClientSecret": null,
+            "googleOAuthScopes": null,
+            "facebookAppId": null,
+            "facebookAppSecret": null,
+            "facebookOAuthScopes": null,
+            "twitterConsumerKey": null,
+            "twitterConsumerSecret": null,
+            "microsoftAccountClientId": null,
+            "microsoftAccountClientSecret": null,
+            "microsoftAccountOAuthScopes": null
+          }
+        }
+      ]
+    }
+  ]
+}
