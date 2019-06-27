@@ -17,6 +17,8 @@ Users can add new items to their list, or mark existing items as complete (which
 
 This sample is similar to https://github.com/ssemyan/TodoServerless but uses Functions 2.0 and instead of serving the content from a storage account via a proxy, it uses an App Service to host the HTML and JS.  
 
+It is also similar to https://github.com/ssemyan/TodoServerless3 but uses Cosmos DB instead of Azure Storage Tables to store the data, and it implements authentication.   
+
 Note: the connection string to the Cosmos DB account is automatically added to the Functions app. Another approach would be to use Managed Service Identity and retrieve it from a KeyVault using the technique described here: https://docs.microsoft.com/en-us/azure/app-service/app-service-key-vault-references
 
 ## Setup steps on Localhost
